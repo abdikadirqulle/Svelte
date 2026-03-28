@@ -16,38 +16,40 @@
 >
 	{#if data.financeUser}
 		<aside
-			class="flex w-56 flex-col border-r border-slate-800 bg-slate-900/80 backdrop-blur"
+			class="flex w-60 flex-col border-r border-slate-800/90 bg-slate-900/90 backdrop-blur-md"
 			aria-label="Main navigation"
 		>
 			<div class="border-b border-slate-800 px-4 py-5">
 				<a href="/dashboard" class="text-lg font-semibold tracking-tight text-white">Finance Tracker</a>
-				<p class="mt-0.5 truncate text-xs text-slate-400">{data.financeUser.email}</p>
+				<p class="mt-1 truncate text-xs text-slate-500">{data.financeUser.email}</p>
 			</div>
 			<nav class="flex flex-1 flex-col gap-1 p-3">
 				<a
 					href="/dashboard"
-					class="rounded-lg px-3 py-2 text-sm font-medium transition-colors {page.url.pathname ===
-					'/dashboard'
-						? 'bg-emerald-500/15 text-emerald-300'
-						: 'text-slate-300 hover:bg-slate-800 hover:text-white'}"
+					class="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors {page.url
+						.pathname === '/dashboard'
+						? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-200'
+						: 'text-slate-400 hover:bg-slate-800/70 hover:text-white'}"
 				>
+					<span class="h-1.5 w-1.5 rounded-full {page.url.pathname === '/dashboard' ? 'bg-emerald-400' : 'bg-slate-600'}" aria-hidden="true"></span>
 					Dashboard
 				</a>
 				<a
 					href="/transactions"
-					class="rounded-lg px-3 py-2 text-sm font-medium transition-colors {page.url.pathname ===
-					'/transactions'
-						? 'bg-emerald-500/15 text-emerald-300'
-						: 'text-slate-300 hover:bg-slate-800 hover:text-white'}"
+					class="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors {page.url
+						.pathname === '/transactions'
+						? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-200'
+						: 'text-slate-400 hover:bg-slate-800/70 hover:text-white'}"
 				>
+					<span class="h-1.5 w-1.5 rounded-full {page.url.pathname === '/transactions' ? 'bg-emerald-400' : 'bg-slate-600'}" aria-hidden="true"></span>
 					Transactions
 				</a>
 			</nav>
 			<div class="border-t border-slate-800 p-3">
-				<form method="POST" action="/?/logout" use:enhance>
+				<form method="POST" action="/login?/logout" use:enhance>
 					<button
 						type="submit"
-						class="w-full rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2 text-sm font-medium text-slate-200 transition-colors hover:border-slate-600 hover:bg-slate-800"
+						class="w-full rounded-xl border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:border-slate-500 hover:bg-slate-800 hover:text-white"
 					>
 						Log out
 					</button>

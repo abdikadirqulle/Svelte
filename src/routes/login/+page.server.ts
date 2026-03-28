@@ -9,6 +9,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
+	logout: async ({ cookies }) => {
+		cookies.delete(FINANCE_SESSION_COOKIE, { path: '/' });
+		redirect(303, '/login');
+	},
+
 	login: async ({ request, cookies }) => {
 		const data = await request.formData();
 		const email = String(data.get('email') ?? '').trim();
