@@ -13,23 +13,16 @@
 
 <div class="flex flex-1 flex-col items-center justify-center px-4 py-16">
 	<div
-		class="w-full max-w-sm rounded-2xl border border-slate-800 bg-slate-900/70 p-8 shadow-2xl shadow-black/50 ring-1 ring-white/5"
+		class="w-full max-w-sm rounded-2xl border border-slate-800 bg-slate-900/70 p-8 shadow-2xl ring-1 shadow-black/50 ring-white/5"
 	>
 		<h1 class="text-center text-2xl font-semibold tracking-tight text-white">Welcome back</h1>
-		<p class="mt-1 text-center text-sm text-slate-400">Sign in to your Finance Tracker</p>
+		<p class="mt-1 text-center text-sm text-slate-400">Sign in with email or GitHub.</p>
 
-		<p
-			class="mt-5 rounded-xl border border-slate-700/80 bg-slate-800/50 px-3 py-2.5 text-center text-xs text-slate-400"
-		>
-			Demo:
-			<span class="font-mono text-emerald-300/90">demo@example.com</span>
-			·
-			<span class="font-mono text-emerald-300/90">demo12345</span>
-		</p>
-
-		<form method="POST" action="?/login" class="mt-8 space-y-5" use:enhance>
+		<form method="POST" action="?/signInEmail" class="mt-8 space-y-5" use:enhance>
 			<div>
-				<label for="email" class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400"
+				<label
+					for="email"
+					class="mb-1.5 block text-xs font-medium tracking-wide text-slate-400 uppercase"
 					>Email</label
 				>
 				<input
@@ -45,7 +38,7 @@
 			<div>
 				<label
 					for="password"
-					class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400"
+					class="mb-1.5 block text-xs font-medium tracking-wide text-slate-400 uppercase"
 					>Password</label
 				>
 				<input
@@ -74,5 +67,38 @@
 				Sign in
 			</button>
 		</form>
+
+		<div class="relative my-8">
+			<div class="absolute inset-0 flex items-center" aria-hidden="true">
+				<div class="w-full border-t border-slate-800"></div>
+			</div>
+			<div class="relative flex justify-center text-xs tracking-wide uppercase">
+				<span class="bg-slate-900/70 px-3 text-slate-500">Or continue with</span>
+			</div>
+		</div>
+
+		<form method="POST" action="?/signInSocial" use:enhance>
+			<input type="hidden" name="provider" value="github" />
+			<input type="hidden" name="callbackURL" value="/dashboard" />
+			<button
+				type="submit"
+				class="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-600 bg-slate-800/50 py-3 text-sm font-semibold text-slate-100 transition-colors hover:border-slate-500 hover:bg-slate-800"
+			>
+				<svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+					<path
+						fill="currentColor"
+						d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+					/>
+				</svg>
+				Continue with GitHub
+			</button>
+		</form>
+
+		<p class="mt-6 text-center text-sm text-slate-500">
+			New here?
+			<a href="/sign-up" class="font-medium text-emerald-400 hover:text-emerald-300"
+				>Create an account</a
+			>
+		</p>
 	</div>
 </div>

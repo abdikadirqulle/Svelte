@@ -1,8 +1,8 @@
-/**
- * In-memory finance data. Swap this module for a real database when ready.
- * Note: this repo already uses `$lib/server/db` for Drizzle/better-auth, so this file is named `finance-db.ts`.
- */
-export const FINANCE_SESSION_COOKIE = 'finance_session';
+import { randomUUID } from 'node:crypto';
+import { and, desc, eq, sql } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { financeTransaction } from '$lib/server/db/schema';
+
 export interface Transaction {
 	id: string;
 	type: 'income' | 'expense';
@@ -12,86 +12,66 @@ export interface Transaction {
 	userId: string;
 }
 
-interface MockUser {
-	id: string;
-	email: string;
-	password: string;
+function mapRow(row: typeof financeTransaction.$inferSelect): Transaction {
+	return {
+		id: row.id,
+		type: row.type === 'income' ? 'income' : 'expense',
+		amount: row.amount,
+		description: row.description,
+		createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt),
+		userId: row.userId
+	};
 }
 
-const users: MockUser[] = [
-	{ id: 'user-1', email: 'demo@example.com', password: 'demo12345' },
-	{ id: 'user-2', email: 'test@example.com', password: 'password' }
-];
-
-let transactions: Transaction[] = [
-	{
-		id: crypto.randomUUID(),
-		type: 'income',
-		amount: 3500,
-		description: 'Salary',
-		createdAt: new Date().toISOString(),
-		userId: 'user-1'
-	},
-	{
-		id: crypto.randomUUID(),
-		type: 'expense',
-		amount: 89.5,
-		description: 'Groceries',
-		createdAt: new Date().toISOString(),
-		userId: 'user-1'
-	}
-];
-
-export function findUserByCredentials(
-	email: string,
-	password: string
-): Pick<MockUser, 'id' | 'email'> | null {
-	const user = users.find((u) => u.email === email && u.password === password);
-	if (!user) return null;
-	return { id: user.id, email: user.email };
+export async function listTransactionsForUser(userId: string): Promise<Transaction[]> {
+	const rows = await db
+		.select()
+		.from(financeTransaction)
+		.where(eq(financeTransaction.userId, userId))
+		.orderBy(desc(financeTransaction.createdAt));
+	return rows.map(mapRow);
 }
 
-export function listTransactionsForUser(userId: string): Transaction[] {
-	return transactions
-		.filter((t) => t.userId === userId)
-		.slice()
-		.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-}
-
-export function addTransaction(
+export async function addTransaction(
 	userId: string,
 	input: { type: 'income' | 'expense'; amount: number; description: string }
-): Transaction {
-	const row: Transaction = {
-		id: crypto.randomUUID(),
+): Promise<Transaction> {
+	const id = randomUUID();
+	const values = {
+		id,
+		userId,
 		type: input.type,
 		amount: input.amount,
-		description: input.description.trim(),
-		createdAt: new Date().toISOString(),
-		userId
+		description: input.description.trim()
 	};
-	transactions = [row, ...transactions];
-	return row;
+	const [row] = await db.insert(financeTransaction).values(values).returning();
+	if (!row) throw new Error('Insert failed');
+	return mapRow(row);
 }
 
-export function deleteTransaction(userId: string, id: string): boolean {
-	const before = transactions.length;
-	transactions = transactions.filter((t) => !(t.id === id && t.userId === userId));
-	return transactions.length < before;
+export async function deleteTransaction(userId: string, id: string): Promise<boolean> {
+	const res = await db
+		.delete(financeTransaction)
+		.where(and(eq(financeTransaction.id, id), eq(financeTransaction.userId, userId)))
+		.returning({ id: financeTransaction.id });
+	return res.length > 0;
 }
 
-export function getSummaryForUser(userId: string): {
+export async function getSummaryForUser(userId: string): Promise<{
 	totalIncome: number;
 	totalExpenses: number;
 	balance: number;
-} {
-	const mine = transactions.filter((t) => t.userId === userId);
-	let totalIncome = 0;
-	let totalExpenses = 0;
-	for (const t of mine) {
-		if (t.type === 'income') totalIncome += t.amount;
-		else totalExpenses += t.amount;
-	}
+}> {
+	const [row] = await db
+		.select({
+			totalIncome: sql<number>`coalesce(sum(case when ${financeTransaction.type} = 'income' then ${financeTransaction.amount} else 0 end), 0)`,
+			totalExpenses: sql<number>`coalesce(sum(case when ${financeTransaction.type} = 'expense' then ${financeTransaction.amount} else 0 end), 0)`
+		})
+		.from(financeTransaction)
+		.where(eq(financeTransaction.userId, userId));
+
+	const totalIncome = Number(row?.totalIncome ?? 0);
+	const totalExpenses = Number(row?.totalExpenses ?? 0);
 	return {
 		totalIncome,
 		totalExpenses,

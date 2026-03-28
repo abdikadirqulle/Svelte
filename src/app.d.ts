@@ -7,8 +7,6 @@ declare global {
 		interface Locals {
 			user?: User;
 			session?: Session;
-			/** Simple finance-app session (mock); separate from better-auth */
-			financeUser?: { id: string; email: string };
 		}
 
 		// interface Error {}

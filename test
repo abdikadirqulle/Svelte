@@ -1,0 +1,25 @@
+# -----------------------------------------------------------------------------
+# App URL (required for Better Auth & GitHub OAuth callback)
+# Local dev: http://localhost:5173  — must match the URL you open in the browser
+# -----------------------------------------------------------------------------
+ORIGIN="http://localhost:5173"
+
+# -----------------------------------------------------------------------------
+# Supabase → PostgreSQL connection (Drizzle)
+# Dashboard: Project Settings → Database
+# - Use "Session pooler" (port 6543) or "Direct" (5432) URI for DATABASE_URL
+# - Add ?sslmode=require if your client needs explicit TLS
+# Example:
+# DATABASE_URL="postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres"
+# -----------------------------------------------------------------------------
+DATABASE_URL="postgresql://postgres:Aabequule11@.AA@db.jzolxrerzfwohdldqppt.supabase.co:5432/postgres"
+
+# Better Auth — generate a long random string for production
+# https://www.better-auth.com/docs/installation
+BETTER_AUTH_SECRET=""
+
+# GitHub OAuth App
+# Authorization callback URL on GitHub must be: {ORIGIN}/api/auth/callback/github
+# https://www.better-auth.com/docs/authentication/github
+GITHUB_CLIENT_ID=""
+GITHUB_CLIENT_SECRET=""

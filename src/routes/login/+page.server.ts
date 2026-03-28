@@ -1,41 +1,69 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { dev } from '$app/environment';
 import type { Actions, PageServerLoad } from './$types';
-import { findUserByCredentials, FINANCE_SESSION_COOKIE } from '$lib/server/finance-db';
+import { auth } from '$lib/server/auth';
+import { APIError } from 'better-auth/api';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	if (locals.financeUser) throw redirect(303, '/dashboard');
+	if (locals.user) throw redirect(303, '/dashboard');
 	return {};
 };
 
 export const actions: Actions = {
-	logout: async ({ cookies }) => {
-		cookies.delete(FINANCE_SESSION_COOKIE, { path: '/' });
-		redirect(303, '/login');
+	signOut: async (event) => {
+		await auth.api.signOut({
+			headers: event.request.headers
+		});
+		throw redirect(303, '/login');
 	},
 
-	login: async ({ request, cookies }) => {
-		const data = await request.formData();
-		const email = String(data.get('email') ?? '').trim();
-		const password = String(data.get('password') ?? '');
+	signInEmail: async (event) => {
+		const formData = await event.request.formData();
+		const email = formData.get('email')?.toString() ?? '';
+		const password = formData.get('password')?.toString() ?? '';
 
 		if (!email || !password) {
 			return fail(400, { email, error: 'Email and password are required.' });
 		}
 
-		const user = findUserByCredentials(email, password);
-		if (!user) {
-			return fail(400, { email, error: 'Invalid email or password.' });
+		try {
+			await auth.api.signInEmail({
+				body: { email, password, callbackURL: '/dashboard' },
+				headers: event.request.headers
+			});
+		} catch (error) {
+			if (error instanceof APIError) {
+				return fail(400, { email, error: error.message || 'Sign-in failed.' });
+			}
+			return fail(500, { email, error: 'Unexpected error.' });
 		}
 
-		cookies.set(FINANCE_SESSION_COOKIE, JSON.stringify({ id: user.id, email: user.email }), {
-			path: '/',
-			httpOnly: true,
-			sameSite: 'lax',
-			secure: !dev,
-			maxAge: 60 * 60 * 24 * 30
-		});
-
 		throw redirect(303, '/dashboard');
+	},
+
+	signInSocial: async (event) => {
+		const formData = await event.request.formData();
+		const provider = formData.get('provider')?.toString() ?? 'github';
+		const callbackURL = formData.get('callbackURL')?.toString() ?? '/dashboard';
+
+		try {
+			const result = await auth.api.signInSocial({
+				body: {
+					provider: provider as 'github',
+					callbackURL
+				},
+				headers: event.request.headers
+			});
+
+			if (result.url) {
+				throw redirect(302, result.url);
+			}
+		} catch (error) {
+			if (error instanceof APIError) {
+				return fail(400, { error: error.message || 'Social sign-in failed.' });
+			}
+			throw error;
+		}
+
+		return fail(400, { error: 'Social sign-in failed.' });
 	}
 };
