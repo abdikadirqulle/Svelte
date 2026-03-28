@@ -2,8 +2,8 @@
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
-	const { invoice } = data;
-	const { sale } = invoice;
+	let invoice = $derived(data.invoice);
+	let sale = $derived(invoice.sale);
 </script>
 
 <svelte:head>

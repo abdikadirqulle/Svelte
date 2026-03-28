@@ -4,7 +4,7 @@
 	import { toastStore } from '$lib/toast.svelte';
 	import type { PageData, ActionData } from './$types';
 
-	let { data, form }: { data: PageData; form: ActionData & { values?: Record<string, string>, field_errors?: Record<string, string[]> } } = $props();
+	let { data, form }: { data: PageData; form: (ActionData & { values?: Record<string, string>, field_errors?: Record<string, string[]> }) | null } = $props();
 
 	let showModal = $state(false);
 	let isSubmitting = $state(false);
