@@ -11,6 +11,7 @@ import {
 	pgEnum,
 	date
 } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 import { user } from './auth.schema';
 
 export const task = pgTable('task', {
@@ -105,3 +106,35 @@ export const erpInvoice = pgTable(
 		index('erp_invoice_number_idx').on(table.invoiceNumber)
 	]
 );
+
+// ─── ERP: Relations ────────────────────────────────────────────────────────────
+
+export const erpProductRelations = relations(erpProduct, ({ many }) => ({
+	saleItems: many(erpSaleItem)
+}));
+
+export const erpSaleRelations = relations(erpSale, ({ many, one }) => ({
+	saleItems: many(erpSaleItem),
+	invoice: one(erpInvoice, {
+		fields: [erpSale.id],
+		references: [erpInvoice.saleId]
+	})
+}));
+
+export const erpSaleItemRelations = relations(erpSaleItem, ({ one }) => ({
+	sale: one(erpSale, {
+		fields: [erpSaleItem.saleId],
+		references: [erpSale.id]
+	}),
+	product: one(erpProduct, {
+		fields: [erpSaleItem.productId],
+		references: [erpProduct.id]
+	})
+}));
+
+export const erpInvoiceRelations = relations(erpInvoice, ({ one }) => ({
+	sale: one(erpSale, {
+		fields: [erpInvoice.saleId],
+		references: [erpSale.id]
+	})
+}));

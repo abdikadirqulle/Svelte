@@ -1,6 +1,6 @@
 import { redirect, fail } from '@sveltejs/kit';
 import { randomUUID } from 'node:crypto';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { erpProduct, erpSale, erpSaleItem } from '$lib/server/db/schema';
 import { processSaleSchema } from '$lib/schemas/erp';
@@ -121,19 +121,9 @@ export const actions: Actions = {
 					await tx
 						.update(erpProduct)
 						.set({
-							stockQuantity: db.$with('sq').as(
-								db
-									.select({ val: sql<number>`${erpProduct.stockQuantity} - ${item.quantity}` })
-									.from(erpProduct)
-									.where(eq(erpProduct.id, item.productId))
-							)
-						} as Partial<typeof erpProduct.$inferInsert>)
+							stockQuantity: sql`${erpProduct.stockQuantity} - ${item.quantity}`
+						})
 						.where(eq(erpProduct.id, item.productId));
-
-					// Use raw decrement approach compatible with drizzle
-					await tx.execute(
-						sql`UPDATE erp_product SET stock_quantity = stock_quantity - ${item.quantity} WHERE id = ${item.productId}`
-					);
 				}
 
 				return { saleId, totalAmount };

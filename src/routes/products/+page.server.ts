@@ -73,7 +73,7 @@ export const actions: Actions = {
 		if (existing.length > 0) {
 			return fail(400, {
 				action: 'addProduct',
-				field_errors: { sku: ['A product with this SKU already exists'] },
+				field_errors: { sku: ['A product with this SKU already exists'] } as Record<string, string[]>,
 				values: raw
 			});
 		}
@@ -117,7 +117,7 @@ export const actions: Actions = {
 		if (existing.length > 0 && existing[0].id !== id) {
 			return fail(400, {
 				action: 'updateProduct',
-				field_errors: { sku: ['A product with this SKU already exists'] },
+				field_errors: { sku: ['A product with this SKU already exists'] } as Record<string, string[]>,
 				values: raw
 			});
 		}
